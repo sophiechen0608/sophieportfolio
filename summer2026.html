@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summer 2026 Journal</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #fbf7f0;
+      color: #1f1f1f;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #fbf7f0 0%, #eadbc8 100%);
+      padding: 60px 8%;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    main {
+      padding: 40px 8%;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .top-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+
+    button,
+    .back-link {
+      border: none;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #1f1f1f;
+      color: white;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+    }
+
+    .back-link {
+      background: white;
+      color: #1f1f1f;
+      border: 1px solid #ddd;
+    }
+
+    .form-card,
+    .entry-card {
+      background: white;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      margin-bottom: 22px;
+      border: 1px solid #f0ece5;
+    }
+
+    .form-card {
+      display: none;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-family: Arial, sans-serif;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .entry-card h2 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .entry-card p {
+      margin: 10px 0;
+      color: #444;
+    }
+
+    .empty {
+      color: #777;
+      background: white;
+      padding: 24px;
+      border-radius: 20px;
+      border: 1px dashed #d9c3aa;
+    }
+
+    .delete-btn {
+      background: #d9c3aa;
+      color: #1f1f1f;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Summer 2026</h1>
+    <p>Track your hours, goals, and what you accomplished.</p>
+  </header>
+
+  <main>
+    <div class="top-buttons">
+      <a class="back-link" href="index.html">← Back to Homepage</a>
+      <button onclick="toggleForm()">Add Entry</button>
+    </div>
+
+    <section id="entryForm" class="form-card">
+      <h2>Add New Entry</h2>
+
+      <label for="entryDate">Date</label>
+      <input type="date" id="entryDate">
+
+      <label for="entryHours">Hours Spent</label>
+      <input type="number" id="entryHours" min="0" step="0.25" placeholder="Example: 2.5">
+
+      <label for="entryGoal">Goal</label>
+      <input type="text" id="entryGoal" placeholder="Example: Finish website navigation">
+
+      <label for="entryWork">What I Accomplished</label>
+      <textarea id="entryWork" placeholder="Write what you did today..."></textarea>
+
+      <br><br>
+      <button onclick="saveEntry()">Save Entry</button>
+    </section>
+
+    <section>
+      <h2>My Entries</h2>
+      <div id="entriesDiv"></div>
+    </section>
+  </main>
+
+  <script>
+    let entries = JSON.parse(localStorage.getItem('summer2026Entries')) || [];
+
+    function toggleForm() {
+      const form = document.getElementById('entryForm');
+      if (form.style.display === 'block') {
+        form.style.display = 'none';
+      } else {
+        form.style.display = 'block';
+      }
+    }
+
+    function saveEntry() {
+      const date = document.getElementById('entryDate').value;
+      const hours = document.getElementById('entryHours').value;
+      const goal = document.getElementById('entryGoal').value;
+      const work = document.getElementById('entryWork').value;
+
+      if (!date || !hours || !goal || !work) {
+        alert('Please fill out date, hours, goal, and what you accomplished.');
+        return;
+      }
+
+      entries.unshift({
+        date: date,
+        hours: hours,
+        goal: goal,
+        work: work
+      });
+
+      localStorage.setItem('summer2026Entries', JSON.stringify(entries));
+
+      document.getElementById('entryDate').value = '';
+      document.getElementById('entryHours').value = '';
+      document.getElementById('entryGoal').value = '';
+      document.getElementById('entryWork').value = '';
+
+      document.getElementById('entryForm').style.display = 'none';
+
+      displayEntries();
+    }
+
+    function displayEntries() {
+      const entriesDiv = document.getElementById('entriesDiv');
+      entriesDiv.innerHTML = '';
+
+      if (entries.length === 0) {
+        entriesDiv.innerHTML = '<div class="empty">No entries yet. Click Add Entry to start.</div>';
+        return;
+      }
+
+      entries.forEach((entry, index) => {
+        entriesDiv.innerHTML += `
+          <div class="entry-card">
+            <h2>${entry.date}</h2>
+            <p><strong>Hours:</strong> ${entry.hours}</p>
+            <p><strong>Goal:</strong><br>${entry.goal}</p>
+            <p><strong>What I Accomplished:</strong><br>${entry.work}</p>
+            <button class="delete-btn" onclick="deleteEntry(${index})">Delete Entry</button>
+          </div>
+        `;
+      });
+    }
+
+    function deleteEntry(index) {
+      if (confirm('Delete this entry?')) {
+        entries.splice(index, 1);
+        localStorage.setItem('summer2026Entries', JSON.stringify(entries));
+        displayEntries();
+      }
+    }
+
+    displayEntries();
+  </script>
+</body>
+</html>

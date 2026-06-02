@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sophie Portfolio</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #fbf7f0;
+      color: #1f1f1f;
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .edit-bar {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .edit-bar button {
+      border: none;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+    }
+
+    .edit-btn {
+      background: #1f1f1f;
+      color: white;
+    }
+
+    .save-btn {
+      background: white;
+      color: #1f1f1f;
+    }
+
+    .download-btn {
+      background: #d9c3aa;
+      color: #1f1f1f;
+    }
+
+    [contenteditable="true"] {
+      outline: 2px dashed #b99a76;
+      background: rgba(255,255,255,0.45);
+      border-radius: 8px;
+      padding: 2px 4px;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 8%;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    nav ul {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    header {
+      min-height: 90vh;
+      padding: 70px 8%;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(135deg, #fbf7f0 0%, #eadbc8 100%);
+    }
+
+    .hero {
+      width: 100%;
+      max-width: 1150px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 50px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-block;
+      background: white;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #6b5848;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: clamp(48px, 8vw, 92px);
+      line-height: 0.95;
+      letter-spacing: -3px;
+      margin-bottom: 22px;
+    }
+
+    .hero-text {
+      font-size: 20px;
+      color: #555;
+      max-width: 680px;
+      margin-bottom: 30px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 24px;
+      border-radius: 999px;
+      font-weight: 800;
+      transition: 0.2s ease;
+    }
+
+    .btn-dark {
+      background: #1f1f1f;
+      color: white;
+    }
+
+    .btn-light {
+      background: white;
+      border: 1px solid #ddd;
+      color: #1f1f1f;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+    }
+
+    .photo-card {
+      background: white;
+      border-radius: 34px;
+      padding: 18px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.14);
+      transform: rotate(2deg);
+    }
+
+    .photo-placeholder {
+      min-height: 420px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #d7bea4, #f7eee3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: #725d49;
+      padding: 30px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    section {
+      padding: 90px 8%;
+    }
+
+    .section-title {
+      font-size: 44px;
+      line-height: 1.1;
+      margin-bottom: 14px;
+      letter-spacing: -1px;
+    }
+
+    .section-intro {
+      color: #666;
+      max-width: 760px;
+      font-size: 18px;
+      margin-bottom: 36px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .two-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #f0ece5;
+      border-radius: 26px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+      transition: 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h3 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .date {
+      color: #8a735d;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .card p,
+    .card li {
+      color: #555;
+    }
+
+    .card ul {
+      padding-left: 20px;
+      margin-top: 10px;
+    }
+
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .skill {
+      background: #efe4d5;
+      color: #5d4a39;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .highlight {
+      background: #1f1f1f;
+      color: white;
+      border-radius: 36px;
+      padding: 56px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      align-items: center;
+      margin-bottom: 34px;
+    }
+
+    .highlight h2 {
+      font-size: 42px;
+      line-height: 1.1;
+    }
+
+    .highlight p {
+      color: #ddd;
+      font-size: 18px;
+    }
+
+    footer {
+      background: #eadbc8;
+      color: #5d4a39;
+      text-align: center;
+      padding: 46px 8%;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      nav ul {
+        display: none;
+      }
+
+      .hero,
+      .grid,
+      .two-grid,
+      .highlight {
+        grid-template-columns: 1fr;
+      }
+
+      .photo-placeholder {
+        min-height: 300px;
+      }
+
+      .edit-bar {
+        left: 20px;
+        right: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+
+  <nav>
+    <div class="logo editable">Sophie</div>
+    <ul>
+      <li><a href="#about">About</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#volunteer">Volunteer</a></li>
+      <li><a href="#achievements">Achievements</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <div class="hero">
+      <div>
+        <span class="badge editable">High School Portfolio</span>
+        <h1 class="editable">Hi, I’m Sophie.</h1>
+        <p class="hero-text editable">
+          I’m a student, leader, volunteer, and future innovator passionate about learning,
+          helping my community, and building meaningful experiences through academics,
+          service, and leadership.
+        </p>
+        <div class="buttons">
+          <a href="#experience" class="btn btn-dark editable">View My Work</a>
+          <a href="#contact" class="btn btn-light editable">Contact Me</a>
+        </div>
+      </div>
+      <div class="photo-card">
+        <div class="photo-placeholder editable"><br></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="about">
+    <h2 class="section-title editable">About Me</h2>
+    <p class="section-intro editable">
+      This section introduces who I am, what I care about, and what I’m working toward.
+    </p>
+    <div class="two-grid">
+      <div class="card">
+        <h3 class="editable">My Story</h3>
+        <p class="editable">
+          I am currently a high school student interested in leadership, community impact,
+          and exploring future career opportunities. I enjoy challenging myself through academics,
+          extracurricular activities, volunteering, and personal projects.
+        </p>
+      </div>
+      <div class="card">
+        <h3 class="editable">Interests &amp; Skills</h3>
+        <p class="editable">
+          I’m always looking for new ways to grow, collaborate, and make a positive impact.
+        </p>
+        <div class="skills">
+          <span class="skill editable">Leadership</span>
+          <span class="skill editable">Volunteering</span>
+          <span class="skill editable">Communication</span>
+          <span class="skill editable">Teamwork</span>
+          <span class="skill editable">Creativity</span>
+          <span class="skill editable">Problem Solving</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience">
+    <h2 class="section-title editable">Experience</h2>
+    <p class="section-intro editable">
+      A collection of internships, leadership roles, clubs, jobs, and other meaningful experiences.
+    </p>
+    <div class="grid">
+      <div class="card">
+        <h3 class="editable">[Internship Name]</h3>
+        <div class="date editable">[Organization] • [Dates]</div>
+        <p class="editable">Describe what you did, what you learned, and the skills you gained from this experience.</p>
+        <ul>
+          <li class="editable">Assisted with important tasks</li>
+          <li class="editable">Worked with mentors or team members</li>
+          <li class="editable">Built communication and organization skills</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="editable">[Leadership Position]</h3>
+        <div class="date editable">[Club/School] • [Dates]</div>
+        <p class="editable">Describe your leadership role and how you contributed to your team, club, or school.</p>
+        <ul>
+          <li class="editable">Organized meetings or events</li>
+          <li class="editable">Collaborated with other students</li>
+          <li class="editable">Helped increase engagement</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="editable">[Activity or Club]</h3>
+        <div class="date editable">[School/Organization] • [Dates]</div>
+        <p class="editable">Describe your involvement and what this activity shows about your interests or strengths.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="volunteer">
+    <h2 class="section-title editable">Volunteer Work</h2>
+    <p class="section-intro editable">
+      Community service experiences that reflect my commitment to helping others.
+    </p>
+    <div class="grid">
+      <div class="card">
+        <h3 class="editable">[Volunteer Organization]</h3>
+        <div class="date editable">[Dates] • [Hours]</div>
+        <p class="editable">Explain the organization, your role, and the impact of your volunteer work.</p>
+      </div>
+      <div class="card">
+        <h3 class="editable">[Community Event]</h3>
+        <div class="date editable">[Date]</div>
+        <p class="editable">Describe how you supported the event and what you learned from participating.</p>
+      </div>
+      <div class="card">
+        <h3 class="editable">[Service Project]</h3>
+        <div class="date editable">[Dates]</div>
+        <p class="editable">Share what problem the project addressed and how you helped contribute to the solution.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="achievements">
+    <div class="highlight">
+      <div>
+        <h2 class="editable">Achievements &amp; Recognition</h2>
+      </div>
+      <div>
+        <p class="editable">
+          This section highlights awards, certifications, academic honors, competitions,
+          scholarships, and other accomplishments that represent my growth and dedication.
+        </p>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3 class="editable">Academic Honors</h3>
+        <p class="editable">Honor Roll, GPA recognition, AP/Honors courses, or subject awards.</p>
+      </div>
+      <div class="card">
+        <h3 class="editable">Certifications</h3>
+        <p class="editable">List certificates, online courses, training, or professional skills you completed.</p>
+      </div>
+      <div class="card">
+        <h3 class="editable">Competitions</h3>
+        <p class="editable">Add competitions, placements, performances, or special recognitions.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <h2 class="section-title editable">Projects</h2>
+    <p class="section-intro editable">
+      Personal, academic, creative, or technical projects that show what I can build and create.
+    </p>
+    <div class="grid">
+      <div class="card">
+        <h3>
+          <a href="summer2026.html">Summer 2026</a>
+        </h3>
+        <p class="editable">Click the title above to open my Summer 2026 project page.</p>
+      </div>
+      <div class="card">
+        <h3 class="editable">[Project Name]</h3>
+        <p class="editable">Describe the outcome, your role, and why this project matters to you.</p>
+      </div>
+      <div class="card">
+        <h3 class="editable">[Project Name]</h3>
+        <p class="editable">Add a link, screenshot, or short explanation of the work you completed.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <h2 class="section-title editable">Contact</h2>
+    <p class="section-intro editable">
+      Thank you for visiting my portfolio. Feel free to reach out or connect with me.
+    </p>
+    <div class="card">
+      <h3 class="editable">Let’s Connect</h3>
+      <p class="editable">Email: sophie@email.com</p>
+      <p class="editable">LinkedIn: Add your LinkedIn link here</p>
+      <p class="editable">Resume: Add your resume link here</p>
+    </div>
+  </section>
+
+  <footer>
+    <p class="editable">© 2026 Sophie [Last Name]. All Rights Reserved.</p>
+  </footer>
+
+  <script>
+    let editMode = false;
+
+    function toggleEdit() {
+      editMode = !editMode;
+      const items = document.querySelectorAll('.editable');
+      items.forEach(item => {
+        item.contentEditable = editMode;
+      });
+      document.querySelector('.edit-btn').textContent = editMode ? 'Turn Edit Mode Off' : 'Turn Edit Mode On';
+      alert(editMode ? 'Edit Mode is ON. Click text on the page to edit it.' : 'Edit Mode is OFF.');
+    }
+
+    function saveChanges() {
+      const editableItems = document.querySelectorAll('.editable');
+      const savedData = [];
+
+      editableItems.forEach(item => {
+        savedData.push(item.innerHTML);
+      });
+
+      localStorage.setItem('sophiePortfolioContent', JSON.stringify(savedData));
+      alert('Saved on this browser. To publish your edits, click Download Edited Website and upload the new file.');
+    }
+
+    function loadChanges() {
+      const savedData = JSON.parse(localStorage.getItem('sophiePortfolioContent'));
+      if (!savedData) return;
+
+      const editableItems = document.querySelectorAll('.editable');
+      editableItems.forEach((item, index) => {
+        if (savedData[index] !== undefined) {
+          item.innerHTML = savedData[index];
+        }
+      });
+    }
+
+    function downloadPage() {
+      const clone = document.documentElement.cloneNode(true);
+      const editBar = clone.querySelector('.edit-bar');
+      if (editBar) editBar.remove();
+
+      clone.querySelectorAll('[contenteditable]').forEach(item => {
+        item.removeAttribute('contenteditable');
+      });
+
+      const htmlContent = '<!DOCTYPE html>\n' + clone.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'index.html';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    window.onload = loadChanges;
+  </script>
+
+<div class="edit-bar">
+  <button class="edit-btn" onclick="toggleEdit()">Turn Edit Mode On</button>
+  <button class="save-btn" onclick="saveChanges()">Save Changes</button>
+</div>
+
+<style>
+.edit-bar {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn,
+.save-btn {
+  border: none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.edit-btn {
+  background: #1f1f1f;
+  color: white;
+}
+
+.save-btn {
+  background: white;
+  color: #1f1f1f;
+  border: 1px solid #ddd;
+}
+</style>
+
+<script>
+let editMode = false;
+
+function toggleEdit() {
+  editMode = !editMode;
+
+  const editableItems = document.querySelectorAll('.editable');
+
+  editableItems.forEach(item => {
+    item.contentEditable = editMode;
+  });
+
+  document.querySelector('.edit-btn').textContent =
+    editMode ? 'Turn Edit Mode Off' : 'Turn Edit Mode On';
+}
+
+function saveChanges() {
+  const editableItems = document.querySelectorAll('.editable');
+  const savedData = [];
+
+  editableItems.forEach(item => {
+    savedData.push(item.innerHTML);
+  });
+
+  localStorage.setItem('websiteContent', JSON.stringify(savedData));
+
+  alert('Changes saved!');
+}
+
+function loadChanges() {
+  const savedData = JSON.parse(localStorage.getItem('websiteContent'));
+
+  if (!savedData) return;
+
+  const editableItems = document.querySelectorAll('.editable');
+
+  editableItems.forEach((item, index) => {
+    if (savedData[index] !== undefined) {
+      item.innerHTML = savedData[index];
+    }
+  });
+}
+
+window.onload = loadChanges;
+</script>
+
+</body></html>
