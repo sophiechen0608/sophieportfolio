@@ -133,7 +133,6 @@
     <div class="top-buttons">
       <a class="back-link" href="index.html">← Back to Homepage</a>
       <button onclick="toggleForm()">Add Entry</button>
-      <button onclick="loadEntries()">Refresh Entries</button>
     </div>
 
     <section id="entryForm" class="form-card">
@@ -288,6 +287,7 @@
               <p><strong>Hours:</strong> ${hours}</p>
               <p><strong>Goal:</strong><br>${goal}</p>
               <p><strong>What I Accomplished:</strong><br>${work}</p>
+<button onclick="this.parentElement.remove()">Delete Entry</button>
             </div>
           `;
         });
