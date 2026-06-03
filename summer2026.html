@@ -41,8 +41,7 @@
     }
 
     button,
-    .back-link,
-    .form-link {
+    .back-link {
       border: none;
       padding: 12px 18px;
       border-radius: 999px;
@@ -53,7 +52,6 @@
       text-decoration: none;
       display: inline-block;
       font-size: 14px;
-      font-family: Arial, sans-serif;
     }
 
     .back-link {
@@ -62,6 +60,7 @@
       border: 1px solid #ddd;
     }
 
+    .form-card,
     .entry-card {
       background: white;
       border-radius: 24px;
@@ -69,6 +68,32 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.08);
       margin-bottom: 22px;
       border: 1px solid #f0ece5;
+    }
+
+    .form-card {
+      display: none;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-family: Arial, sans-serif;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
     }
 
     .entry-card h2 {
@@ -88,6 +113,12 @@
       border-radius: 20px;
       border: 1px dashed #d9c3aa;
     }
+
+    .delete-btn {
+      background: #d9c3aa;
+      color: #1f1f1f;
+      margin-top: 12px;
+    }
   </style>
 </head>
 
@@ -100,110 +131,107 @@
   <main>
     <div class="top-buttons">
       <a class="back-link" href="index.html">← Back to Homepage</a>
-      <a class="form-link" href="https://docs.google.com/forms/d/e/1FAIpQLSfgQbhkHe0yOYPCP3hRLlP-JyUzwoFEqzd9zg4G_y43f_Xiiw/viewform?usp=preview" target="_blank">Add Entry</a>
-      <button onclick="loadEntries()">Refresh Entries</button>
+      <button onclick="toggleForm()">Add Entry</button>
     </div>
+
+    <section id="entryForm" class="form-card">
+      <h2>Add New Entry</h2>
+
+      <label for="entryDate">Date</label>
+      <input type="date" id="entryDate">
+
+      <label for="entryHours">Hours Spent</label>
+      <input type="number" id="entryHours" min="0" step="0.25" placeholder="Example: 2.5">
+
+      <label for="entryGoal">Goal</label>
+      <input type="text" id="entryGoal" placeholder="Example: Finish website navigation">
+
+      <label for="entryWork">What I Accomplished</label>
+      <textarea id="entryWork" placeholder="Write what you did today..."></textarea>
+
+      <br><br>
+      <button onclick="saveEntry()">Save Entry</button>
+    </section>
 
     <section>
       <h2>My Entries</h2>
-      <div id="entriesDiv" class="empty">Loading entries...</div>
+      <div id="entriesDiv"></div>
     </section>
   </main>
 
   <script>
-    const sheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSswrDLcF7fQyyeDQukjuzqe8SgVUnsbJf23NaQPsnD4Wnb7siD6HG0lK7VoLKq_Zbq0gtDWiihsm-5/pub?output=csv";
+    let entries = JSON.parse(localStorage.getItem('summer2026Entries')) || [];
 
-    function parseCSV(text) {
-      const rows = [];
-      let row = [];
-      let value = "";
-      let quotes = false;
-
-      for (let i = 0; i < text.length; i++) {
-        const c = text[i];
-        const n = text[i + 1];
-
-        if (c === '"' && quotes && n === '"') {
-          value += '"';
-          i++;
-        } else if (c === '"') {
-          quotes = !quotes;
-        } else if (c === ',' && !quotes) {
-          row.push(value);
-          value = "";
-        } else if ((c === '\n' || c === '\r') && !quotes) {
-          if (value || row.length) {
-            row.push(value);
-            rows.push(row);
-            row = [];
-            value = "";
-          }
-          if (c === '\r' && n === '\n') i++;
-        } else {
-          value += c;
-        }
-      }
-
-      if (value || row.length) {
-        row.push(value);
-        rows.push(row);
-      }
-
-      return rows;
-    }
-
-    function clean(value) {
-      return value ? value.trim() : "";
-    }
-
-    async function loadEntries() {
-      const entriesDiv = document.getElementById("entriesDiv");
-      entriesDiv.className = "empty";
-      entriesDiv.innerHTML = "Loading entries...";
-
-      try {
-        const response = await fetch(sheetCSV);
-        const text = await response.text();
-        const rows = parseCSV(text);
-
-        if (rows.length <= 1) {
-          entriesDiv.innerHTML = "No entries yet. Click Add Entry to start.";
-          return;
-        }
-
-        const dataRows = rows.slice(1).filter(row => row.some(cell => clean(cell)));
-
-        if (dataRows.length === 0) {
-          entriesDiv.innerHTML = "No entries yet. Click Add Entry to start.";
-          return;
-        }
-
-        entriesDiv.className = "";
-        entriesDiv.innerHTML = "";
-
-        dataRows.reverse().forEach(row => {
-          const timestamp = clean(row[0]);
-          const date = clean(row[1]) || timestamp;
-          const hours = clean(row[2]);
-          const goal = clean(row[3]);
-          const work = clean(row[4]);
-
-          entriesDiv.innerHTML += `
-            <div class="entry-card">
-              <h2>${date}</h2>
-              <p><strong>Hours:</strong> ${hours}</p>
-              <p><strong>Goal:</strong><br>${goal}</p>
-              <p><strong>What I Accomplished:</strong><br>${work}</p>
-            </div>
-          `;
-        });
-      } catch (error) {
-        entriesDiv.className = "empty";
-        entriesDiv.innerHTML = "Could not load entries yet. Make sure your Google Sheet is published to the web.";
+    function toggleForm() {
+      const form = document.getElementById('entryForm');
+      if (form.style.display === 'block') {
+        form.style.display = 'none';
+      } else {
+        form.style.display = 'block';
       }
     }
 
-    loadEntries();
+    function saveEntry() {
+      const date = document.getElementById('entryDate').value;
+      const hours = document.getElementById('entryHours').value;
+      const goal = document.getElementById('entryGoal').value;
+      const work = document.getElementById('entryWork').value;
+
+      if (!date || !hours || !goal || !work) {
+        alert('Please fill out date, hours, goal, and what you accomplished.');
+        return;
+      }
+
+      entries.unshift({
+        date: date,
+        hours: hours,
+        goal: goal,
+        work: work
+      });
+
+      localStorage.setItem('summer2026Entries', JSON.stringify(entries));
+
+      document.getElementById('entryDate').value = '';
+      document.getElementById('entryHours').value = '';
+      document.getElementById('entryGoal').value = '';
+      document.getElementById('entryWork').value = '';
+
+      document.getElementById('entryForm').style.display = 'none';
+
+      displayEntries();
+    }
+
+    function displayEntries() {
+      const entriesDiv = document.getElementById('entriesDiv');
+      entriesDiv.innerHTML = '';
+
+      if (entries.length === 0) {
+        entriesDiv.innerHTML = '<div class="empty">No entries yet. Click Add Entry to start.</div>';
+        return;
+      }
+
+      entries.forEach((entry, index) => {
+        entriesDiv.innerHTML += `
+          <div class="entry-card">
+            <h2>${entry.date}</h2>
+            <p><strong>Hours:</strong> ${entry.hours}</p>
+            <p><strong>Goal:</strong><br>${entry.goal}</p>
+            <p><strong>What I Accomplished:</strong><br>${entry.work}</p>
+            <button class="delete-btn" onclick="deleteEntry(${index})">Delete Entry</button>
+          </div>
+        `;
+      });
+    }
+
+    function deleteEntry(index) {
+      if (confirm('Delete this entry?')) {
+        entries.splice(index, 1);
+        localStorage.setItem('summer2026Entries', JSON.stringify(entries));
+        displayEntries();
+      }
+    }
+
+    displayEntries();
   </script>
 </body>
 </html>
