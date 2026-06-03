@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Summer 2026 Journal</title>
-
   <style>
     * {
       box-sizing: border-box;
@@ -42,8 +41,8 @@
     }
 
     button,
-    .button-link,
-    .back-link {
+    .back-link,
+    .form-link {
       border: none;
       padding: 12px 18px;
       border-radius: 999px;
@@ -89,11 +88,6 @@
       border-radius: 20px;
       border: 1px dashed #d9c3aa;
     }
-
-    .note {
-      color: #666;
-      margin-bottom: 20px;
-    }
   </style>
 </head>
 
@@ -106,13 +100,12 @@
   <main>
     <div class="top-buttons">
       <a class="back-link" href="index.html">← Back to Homepage</a>
-      <a class="button-link" href="https://docs.google.com/forms/d/e/1FAIpQLSfgQbhkHe0yOYPCP3hRLlP-JyUzwoFEqzd9zg4G_y43f_Xiiw/viewform?usp=preview" target="_blank">Add Entry</a>
+      <a class="form-link" href="https://docs.google.com/forms/d/e/1FAIpQLSfgQbhkHe0yOYPCP3hRLlP-JyUzwoFEqzd9zg4G_y43f_Xiiw/viewform?usp=preview" target="_blank">Add Entry</a>
       <button onclick="loadEntries()">Refresh Entries</button>
     </div>
 
     <section>
       <h2>My Entries</h2>
-      <p class="note">Entries submitted through your Google Form will appear here automatically.</p>
       <div id="entriesDiv" class="empty">Loading entries...</div>
     </section>
   </main>
@@ -122,38 +115,38 @@
 
     function parseCSV(text) {
       const rows = [];
-      let currentRow = [];
-      let currentValue = "";
-      let insideQuotes = false;
+      let row = [];
+      let value = "";
+      let quotes = false;
 
       for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const nextChar = text[i + 1];
+        const c = text[i];
+        const n = text[i + 1];
 
-        if (char === '"' && insideQuotes && nextChar === '"') {
-          currentValue += '"';
+        if (c === '"' && quotes && n === '"') {
+          value += '"';
           i++;
-        } else if (char === '"') {
-          insideQuotes = !insideQuotes;
-        } else if (char === ',' && !insideQuotes) {
-          currentRow.push(currentValue);
-          currentValue = "";
-        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
-          if (currentValue || currentRow.length > 0) {
-            currentRow.push(currentValue);
-            rows.push(currentRow);
-            currentRow = [];
-            currentValue = "";
+        } else if (c === '"') {
+          quotes = !quotes;
+        } else if (c === ',' && !quotes) {
+          row.push(value);
+          value = "";
+        } else if ((c === '\n' || c === '\r') && !quotes) {
+          if (value || row.length) {
+            row.push(value);
+            rows.push(row);
+            row = [];
+            value = "";
           }
-          if (char === '\r' && nextChar === '\n') i++;
+          if (c === '\r' && n === '\n') i++;
         } else {
-          currentValue += char;
+          value += c;
         }
       }
 
-      if (currentValue || currentRow.length > 0) {
-        currentRow.push(currentValue);
-        rows.push(currentRow);
+      if (value || row.length) {
+        row.push(value);
+        rows.push(row);
       }
 
       return rows;
