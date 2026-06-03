@@ -41,8 +41,7 @@
     }
 
     button,
-    .back-link,
-    .add-link {
+    .back-link {
       border: none;
       padding: 12px 18px;
       border-radius: 999px;
@@ -53,7 +52,6 @@
       text-decoration: none;
       display: inline-block;
       font-size: 14px;
-      font-family: Arial, sans-serif;
     }
 
     .back-link {
@@ -62,6 +60,7 @@
       border: 1px solid #ddd;
     }
 
+    .form-card,
     .entry-card {
       background: white;
       border-radius: 24px;
@@ -69,6 +68,32 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.08);
       margin-bottom: 22px;
       border: 1px solid #f0ece5;
+    }
+
+    .form-card {
+      display: none;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-family: Arial, sans-serif;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
     }
 
     .entry-card h2 {
@@ -88,6 +113,13 @@
       border-radius: 20px;
       border: 1px dashed #d9c3aa;
     }
+
+    .delete-btn {
+      background: #d9c3aa;
+      color: #1f1f1f;
+      margin-top: 12px;
+      display: none;
+    }
   </style>
 </head>
 
@@ -100,9 +132,28 @@
   <main>
     <div class="top-buttons">
       <a class="back-link" href="index.html">← Back to Homepage</a>
-      <a class="add-link" href="https://docs.google.com/forms/d/e/1FAIpQLSfgQbhkHe0yOYPCP3hRLlP-JyUzwoFEqzd9zg4G_y43f_Xiiw/viewform?usp=preview" target="_blank">Add Entry</a>
+      <button onclick="toggleForm()">Add Entry</button>
       <button onclick="loadEntries()">Refresh Entries</button>
     </div>
+
+    <section id="entryForm" class="form-card">
+      <h2>Add New Entry</h2>
+
+      <label for="entryDate">Date</label>
+      <input type="date" id="entryDate">
+
+      <label for="entryHours">Hours Spent</label>
+      <input type="number" id="entryHours" min="0" step="0.25" placeholder="Example: 2.5">
+
+      <label for="entryGoal">Goal</label>
+      <input type="text" id="entryGoal" placeholder="Example: Finish website navigation">
+
+      <label for="entryWork">What I Accomplished</label>
+      <textarea id="entryWork" placeholder="Write what you did today..."></textarea>
+
+      <br><br>
+      <button onclick="saveEntry()">Save Entry</button>
+    </section>
 
     <section>
       <h2>My Entries</h2>
@@ -111,7 +162,57 @@
   </main>
 
   <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycby7nCqUStt0mA3neW61U753x77mZygj1i1QSJcZ6MKNQfTe9Fuvsu96hSVHCY1E35nT6A/exec";
     const sheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSswrDLcF7fQyyeDQukjuzqe8SgVUnsbJf23NaQPsnD4Wnb7siD6HG0lK7VoLKq_Zbq0gtDWiihsm-5/pub?output=csv";
+
+    function toggleForm() {
+      const form = document.getElementById('entryForm');
+      if (form.style.display === 'block') {
+        form.style.display = 'none';
+      } else {
+        form.style.display = 'block';
+      }
+    }
+
+    async function saveEntry() {
+      const date = document.getElementById('entryDate').value;
+      const hours = document.getElementById('entryHours').value;
+      const goal = document.getElementById('entryGoal').value;
+      const work = document.getElementById('entryWork').value;
+
+      if (!date || !hours || !goal || !work) {
+        alert('Please fill out date, hours, goal, and what you accomplished.');
+        return;
+      }
+
+      try {
+        await fetch(scriptURL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({
+            date: date,
+            hours: hours,
+            goal: goal,
+            work: work
+          })
+        });
+
+        document.getElementById('entryDate').value = '';
+        document.getElementById('entryHours').value = '';
+        document.getElementById('entryGoal').value = '';
+        document.getElementById('entryWork').value = '';
+
+        document.getElementById('entryForm').style.display = 'none';
+
+        alert('Entry saved! It may take a few seconds to appear.');
+        setTimeout(loadEntries, 1500);
+      } catch (error) {
+        alert('Something went wrong. Please try again.');
+      }
+    }
 
     function parseCSV(text) {
       const rows = [];
@@ -157,18 +258,13 @@
     }
 
     async function loadEntries() {
-      const entriesDiv = document.getElementById("entriesDiv");
+      const entriesDiv = document.getElementById('entriesDiv');
       entriesDiv.innerHTML = '<div class="empty">Loading entries...</div>';
 
       try {
         const response = await fetch(sheetCSV);
         const text = await response.text();
         const rows = parseCSV(text);
-
-        if (rows.length <= 1) {
-          entriesDiv.innerHTML = '<div class="empty">No entries yet. Click Add Entry to start.</div>';
-          return;
-        }
 
         const dataRows = rows.slice(1).filter(row => row.some(cell => clean(cell)));
 
@@ -177,7 +273,7 @@
           return;
         }
 
-        entriesDiv.innerHTML = "";
+        entriesDiv.innerHTML = '';
 
         dataRows.reverse().forEach(row => {
           const timestamp = clean(row[0]);
@@ -196,7 +292,7 @@
           `;
         });
       } catch (error) {
-        entriesDiv.innerHTML = '<div class="empty">Could not load entries. Make sure the Google Sheet is published to the web.</div>';
+        entriesDiv.innerHTML = '<div class="empty">Could not load entries. Make sure your Google Sheet is published to the web.</div>';
       }
     }
 
