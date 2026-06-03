@@ -4,45 +4,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Summer 2026 Journal</title>
-  <style>
-    * {{
-      box-sizing: border-box;
-    }}
 
-    body {{
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
       font-family: Arial, sans-serif;
       background: #fbf7f0;
       color: #1f1f1f;
       margin: 0;
       line-height: 1.6;
-    }}
+    }
 
-    header {{
+    header {
       background: linear-gradient(135deg, #fbf7f0 0%, #eadbc8 100%);
       padding: 60px 8%;
-    }}
+    }
 
-    h1 {{
+    h1 {
       font-size: 48px;
       margin-bottom: 10px;
-    }}
+    }
 
-    main {{
+    main {
       padding: 40px 8%;
       max-width: 1000px;
       margin: auto;
-    }}
+    }
 
-    .top-buttons {{
+    .top-buttons {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
       margin-bottom: 25px;
-    }}
+    }
 
     button,
     .button-link,
-    .back-link {{
+    .back-link {
       border: none;
       padding: 12px 18px;
       border-radius: 999px;
@@ -54,40 +55,45 @@
       display: inline-block;
       font-size: 14px;
       font-family: Arial, sans-serif;
-    }}
+    }
 
-    .back-link {{
+    .back-link {
       background: white;
       color: #1f1f1f;
       border: 1px solid #ddd;
-    }}
+    }
 
-    .entry-card {{
+    .entry-card {
       background: white;
       border-radius: 24px;
       padding: 24px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.08);
       margin-bottom: 22px;
       border: 1px solid #f0ece5;
-    }}
+    }
 
-    .entry-card h2 {{
+    .entry-card h2 {
       font-size: 32px;
       margin-bottom: 8px;
-    }}
+    }
 
-    .entry-card p {{
+    .entry-card p {
       margin: 10px 0;
       color: #444;
-    }}
+    }
 
-    .empty {{
+    .empty {
       color: #777;
       background: white;
       padding: 24px;
       border-radius: 20px;
       border: 1px dashed #d9c3aa;
-    }}
+    }
+
+    .note {
+      color: #666;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 
@@ -100,12 +106,13 @@
   <main>
     <div class="top-buttons">
       <a class="back-link" href="index.html">← Back to Homepage</a>
-      <a class="button-link" href="https://docs.google.com/forms/d/e/1FAIpQLSfgQbhkHe0yOYPCP3hRLlP-JyUzwoFEqzd9zg4G_y43f_Xiiw/viewform?usp=preview="_blank">Add Entry</a>
+      <a class="button-link" href="https://docs.google.com/forms/d/e/1FAIpQLSfgQbhkHe0yOYPCP3hRLlP-JyUzwoFEqzd9zg4G_y43f_Xiiw/viewform?usp=preview" target="_blank">Add Entry</a>
       <button onclick="loadEntries()">Refresh Entries</button>
     </div>
 
     <section>
       <h2>My Entries</h2>
+      <p class="note">Entries submitted through your Google Form will appear here automatically.</p>
       <div id="entriesDiv" class="empty">Loading entries...</div>
     </section>
   </main>
@@ -113,77 +120,75 @@
   <script>
     const sheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSswrDLcF7fQyyeDQukjuzqe8SgVUnsbJf23NaQPsnD4Wnb7siD6HG0lK7VoLKq_Zbq0gtDWiihsm-5/pub?output=csv";
 
-    function parseCSV(text) {{
+    function parseCSV(text) {
       const rows = [];
       let currentRow = [];
       let currentValue = "";
       let insideQuotes = false;
 
-      for (let i = 0; i < text.length; i++) {{
+      for (let i = 0; i < text.length; i++) {
         const char = text[i];
         const nextChar = text[i + 1];
 
-        if (char === '"' && insideQuotes && nextChar === '"') {{
+        if (char === '"' && insideQuotes && nextChar === '"') {
           currentValue += '"';
           i++;
-        }} else if (char === '"') {{
+        } else if (char === '"') {
           insideQuotes = !insideQuotes;
-        }} else if (char === ',' && !insideQuotes) {{
+        } else if (char === ',' && !insideQuotes) {
           currentRow.push(currentValue);
           currentValue = "";
-        }} else if ((char === '\n' || char === '\r') && !insideQuotes) {{
-          if (currentValue || currentRow.length > 0) {{
+        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+          if (currentValue || currentRow.length > 0) {
             currentRow.push(currentValue);
             rows.push(currentRow);
             currentRow = [];
             currentValue = "";
-          }}
+          }
           if (char === '\r' && nextChar === '\n') i++;
-        }} else {{
+        } else {
           currentValue += char;
-        }}
-      }}
+        }
+      }
 
-      if (currentValue || currentRow.length > 0) {{
+      if (currentValue || currentRow.length > 0) {
         currentRow.push(currentValue);
         rows.push(currentRow);
-      }}
+      }
 
       return rows;
-    }}
+    }
 
-    function clean(value) {{
+    function clean(value) {
       return value ? value.trim() : "";
-    }}
+    }
 
-    async function loadEntries() {{
+    async function loadEntries() {
       const entriesDiv = document.getElementById("entriesDiv");
       entriesDiv.className = "empty";
       entriesDiv.innerHTML = "Loading entries...";
 
-      try {{
+      try {
         const response = await fetch(sheetCSV);
         const text = await response.text();
         const rows = parseCSV(text);
 
-        if (rows.length <= 1) {{
+        if (rows.length <= 1) {
           entriesDiv.innerHTML = "No entries yet. Click Add Entry to start.";
           return;
-        }}
+        }
 
         const dataRows = rows.slice(1).filter(row => row.some(cell => clean(cell)));
 
-        entriesDiv.className = "";
-
-        if (dataRows.length === 0) {{
-          entriesDiv.className = "empty";
+        if (dataRows.length === 0) {
           entriesDiv.innerHTML = "No entries yet. Click Add Entry to start.";
           return;
-        }}
+        }
 
+        entriesDiv.className = "";
         entriesDiv.innerHTML = "";
 
-        dataRows.reverse().forEach(row => {{
+        dataRows.reverse().forEach(row => {
           const timestamp = clean(row[0]);
           const date = clean(row[1]) || timestamp;
           const hours = clean(row[2]);
@@ -192,18 +197,18 @@
 
           entriesDiv.innerHTML += `
             <div class="entry-card">
-              <h2>${{date}}</h2>
-              <p><strong>Hours:</strong> ${{hours}}</p>
-              <p><strong>Goal:</strong><br>${{goal}}</p>
-              <p><strong>What I Accomplished:</strong><br>${{work}}</p>
+              <h2>${date}</h2>
+              <p><strong>Hours:</strong> ${hours}</p>
+              <p><strong>Goal:</strong><br>${goal}</p>
+              <p><strong>What I Accomplished:</strong><br>${work}</p>
             </div>
           `;
-        }});
-      }} catch (error) {{
+        });
+      } catch (error) {
         entriesDiv.className = "empty";
         entriesDiv.innerHTML = "Could not load entries yet. Make sure your Google Sheet is published to the web.";
-      }}
-    }}
+      }
+    }
 
     loadEntries();
   </script>
