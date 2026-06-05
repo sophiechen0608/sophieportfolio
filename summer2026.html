@@ -286,7 +286,7 @@
               <h2>${date}</h2>
               <p><strong>Hours:</strong> ${hours}</p>
               <p><strong>Goal:</strong><br>${goal}</p>
-              <p><strong>What I Accomplished:</strong><br>${work}</p>
+              <p><strong>What I Accomplished:</strong><br>${work.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')}</p>
             </div>
           `;
         });
